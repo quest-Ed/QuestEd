@@ -1,0 +1,40 @@
+/* Set the background of your app to white */
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: white; /* Set background to white */
+  }
+  
+  .questy-container {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+  
+  .questy-gif {
+    width: 300px; /* Adjust as necessary */
+    height: auto;
+  }
+  
+  .thought-cloud {
+    position: absolute;
+    bottom: 100%; /* Adjust this value to move the cloud up relative to the 'Q' */
+    right: 0;
+    width: 200px; /* Adjust as necessary */
+    /*background: url('/client/public/ThoughtCloud.png') no-repeat; Adjust path as necessary */
+    background-size: contain;
+    text-align: center;
+  }
+  
+  .thought-message {
+    position: relative;
+    top: 50%; /* Adjust these to align your text */
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0.5em; /* Adjust as necessary */
+    /* Add any additional styling to your text here */
+  }
+  
