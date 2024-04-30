@@ -1,14 +1,15 @@
 const express = require('express');
+const cors = require('cors');
 const app= express();
-const expressWs = require('express-ws')(app);
+require('express-ws')(app);
 const chatRouter = require('./routes/chat');
-
+require('dotenv').config();
 
 app.use(cors({
-  origin: 'http://localhost:3001' // Allow your React app to connect
+  origin: process.env.FRONTEND_URL // Allow your React app to connect
 }));
 
-const port = 3000;
+
 
 app.get('/', (req, res) => {
   res.send('Welcome to QuestEd!');
@@ -17,6 +18,6 @@ app.get('/', (req, res) => {
 app.use('/chat', chatRouter);
 
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });

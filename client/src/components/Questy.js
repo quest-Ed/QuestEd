@@ -86,10 +86,10 @@ const Questy = () => {
     return (
         <div className="questy-container">
         <div className="top-section">
-            <img src="/Questy.gif" alt="Questy, your Learning Assistant" className="questy-gif" />
             <div className="thought-cloud" style={{ backgroundImage: `url(${thoughtCloud})` }}>
                 <p className="thought-message">{questyMessage}</p>
             </div>
+            <img src="/Questy.gif" alt="Questy, your Learning Assistant" className="questy-gif" />
         </div>
         <div className="status">Connection Status: {connectionStatus}</div>
         <div className="user-message">You said: {userMessage}</div>

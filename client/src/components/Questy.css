@@ -6,9 +6,8 @@ body, html {
   }
   
   .questy-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: auto;
+    height: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -20,27 +19,34 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    flex-direction: row;  
+    position:relative;
+    width: 200%;
 }
 
 
 .questy-gif {
+    position: relative;
     width: 15%; /* Adjust the size accordingly */
     height: auto;
-    margin-right: 20px; /* Provides space between the image and the thought cloud */
+    z-index:1;
 }
 
   
 .thought-cloud {
     background: url('../assets/ThoughtCloud.png') no-repeat center center;
     background-size: contain;
-    width: 50px; /* Adjust according to your preference */
-    height: auto;
+    width: 250px; /* Adjust according to your preference */
+    height: 250px;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 20px;
+    position: relative;
+    top:-100px; 
+    margin-right: -40px;
+    z-index:2;
+
 }
 
 .thought-message {
