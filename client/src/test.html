@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WebSocket Test</title>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ws = new WebSocket('ws://localhost:3000/chat');
+
+        ws.onopen = function() {
+            console.log('Connected to server');
+            ws.send('Hello, server!');
+        };
+
+        ws.onmessage = function(event) {
+            console.log('Received:', event.data);
+        };
+
+        ws.onerror = function(event) {
+            console.error('WebSocket error:', event);
+        };
+
+        ws.onclose = function() {
+            console.log('WebSocket connection closed');
+        };
+    });
+</script>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+</body>
+</html>

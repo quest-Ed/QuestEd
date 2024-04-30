@@ -1,3 +1,5 @@
+import React from 'react';
+import Questy from './components/Questy';
 import logo from './logo.svg';
 import './App.css';
 
@@ -17,9 +19,11 @@ function App() {
         >
           Learn React
         </a>
+        <Questy /> 
       </header>
     </div>
   );
 }
+
 
 export default App;
