@@ -12,16 +12,32 @@ const Questy = () => {
     const ws = useRef(null);
 
     useEffect(() => {
-        ws.current = new ReconnectingWebSocket('ws://localhost:3000/chat');
+        ws.current = new ReconnectingWebSocket('ws://localhost:3000/chat', [], {
+            reconnectInterval: 4000, // Reconnect every 4000ms
+            reconnectDecay: 1.5,     // Increase the reconnect interval by 1.5x each attempt
+            maxReconnectInterval: 60000, // Maximum reconnect interval
+        });
+        ws.current.onopen = () => {
+            console.log('WebSocket connection opened');
+            setConnectionStatus('Connected');
+        };
 
-        ws.current.onopen = () => setConnectionStatus('Connected');
-        ws.current.onclose = () => setConnectionStatus('Disconnected');
+        ws.current.onclose = (event) => {
+            console.log('WebSocket connection closed', event.reason);
+            setConnectionStatus('Disconnected');
+        };
         ws.current.onmessage = (event) => {
             setQuestyMessage(event.data);
             speak(event.data);
         };
+        ws.current.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
 
-        return () => ws.current.close();
+        return () => {
+            console.log('Closing WebSocket');
+            ws.current.close();
+        };
     }, []);
 
     useEffect(() => {
@@ -41,28 +57,28 @@ const Questy = () => {
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
         recognition.interimResults = false;
+        recognition.continuous = true;
         return recognition;
     };
 
     const startListening = () => {
         const recognition = getSpeechRecognition();
         recognition.start();
+        setIsListening(true);
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
             recognition.stop();
-            setIsListening(false);
             setUserMessage(transcript);
             sendMessageToApi(transcript);
         };
 
         recognition.onerror = (event) => {
             recognition.stop();
-            setIsListening(false);
             console.error('Speech recognition error', event.error);
         };
 
-        recognition.onend = () => setIsListening(false);
+        recognition.onend = () => {setIsListening(false);};
     };
 
     const stopListening = () => {
@@ -72,9 +88,14 @@ const Questy = () => {
     };
 
     const sendMessageToApi = (message) => {
+        console.log("sendMessageToApi called with message:", message);
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+            console.log("message is being sent");
             ws.current.send(message);
+        } else {
+            console.log("WebSocket not open or ws.current not available"); // Log the issue if not sending
         }
+    
     };
 
     const speak = (text) => {
