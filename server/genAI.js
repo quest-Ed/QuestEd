@@ -21,6 +21,7 @@ async function run() {
     try {
         const result = await model.generateContent(prompt);
         console.log('Generation succeeded:', result);
+        console.log(result.text);
     } catch (error) {
         console.error('Error during content generation:', error);
     }

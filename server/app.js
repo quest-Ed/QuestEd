@@ -1,22 +1,64 @@
+// const express = require('express');
+// const app= express();
+// const expressWs = require('express-ws')(app);
+// const chatRouter = require('./routes/chat');
+
+
+// app.use(cors({
+//   origin: 'http://localhost:3001' // Allow your React app to connect
+// }));
+
+// const port = 3000;
+
+// app.get('/', (req, res) => {
+//   res.send('Welcome to QuestEd!');
+// });
+
+// app.use('/chat', chatRouter);
+
+
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
+
 const express = require('express');
-const app= express();
-const expressWs = require('express-ws')(app);
-const chatRouter = require('./routes/chat');
+const http = require('http');
+const socketIo = require('socket.io');
+const cors = require('cors');
+const chatRouter = require('./routes/chat');  // Assuming your chat logic is separated here
+require('dotenv').config();
 
+const app = express();
+const server = http.createServer(app);
 
-app.use(cors({
-  origin: 'http://localhost:3001' // Allow your React app to connect
-}));
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"],
+  credentials: true // Important for cookies, authorization headers with HTTPS 
+};
 
-const port = 3000;
+app.use(cors(corsOptions));
 
-app.get('/', (req, res) => {
-  res.send('Welcome to QuestEd!');
+const io = socketIo(server, {
+  cors: {
+      origin: process.env.FRONTEND_URL, // or your frontend's URL
+      methods: ["GET", "POST"],
+      credentials: true
+  }
 });
 
-app.use('/chat', chatRouter);
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/chat', chatRouter(io)); // Pass the io instance to the router
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Catch-all route for testing that the server is running
+app.get('/', (req, res) => {
+    res.send('Server is up and running!');
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

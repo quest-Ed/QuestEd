@@ -1,106 +1,152 @@
 import React, { useState, useEffect, useRef } from 'react';
-import thoughtCloud from '../assets/ThoughtCloud.png';
+import io from 'socket.io-client';
 import './Questy.css';
-import ReconnectingWebSocket from 'reconnecting-websocket';
 
 const Questy = () => {
     const [userMessage, setUserMessage] = useState('');
-    const [questyMessage, setQuestyMessage] = useState('');
+    const [messages, setMessages] = useState([]);
     const [isListening, setIsListening] = useState(false);
-    const [connectionStatus, setConnectionStatus] = useState('Disconnected');
-    const [speechRecognitionSupported, setSpeechRecognitionSupported] = useState(false);
-    const ws = useRef(null);
+    const [socket, setSocket] = useState(null);
+    const recognition = useRef(null);
+    const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        ws.current = new ReconnectingWebSocket('ws://localhost:3000/chat');
+        const newSocket = io(`http://${window.location.hostname}:3000`);
+        setSocket(newSocket);
 
-        ws.current.onopen = () => setConnectionStatus('Connected');
-        ws.current.onclose = () => setConnectionStatus('Disconnected');
-        ws.current.onmessage = (event) => {
-            setQuestyMessage(event.data);
-            speak(event.data);
-        };
+        newSocket.on('receive_message', (message) => {
+            setMessages(prevMessages => [...prevMessages, { text: message, sender: 'Questy' }]);
+            speak(message);
+        });
 
-        return () => ws.current.close();
+        newSocket.on('error_message', (error) => {
+            console.error('WebSocket error:', error);
+        });
+
+        return () => newSocket.close();
     }, []);
 
     useEffect(() => {
-        setSpeechRecognitionSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+
+    useEffect(() => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition.current = new SpeechRecognition();
+            recognition.current.continuous = false;  // We'll manage continuous listening via the button
+            recognition.current.interimResults = false;
+            recognition.current.lang = 'en-US';
+
+            recognition.current.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                setUserMessage(transcript);
+                sendMessage(transcript);
+            };
+
+            recognition.current.onstart = () => {
+                setIsListening(true);
+            };
+
+            recognition.current.onend = () => {
+                setIsListening(false);
+            };
+
+            recognition.current.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                setIsListening(false);
+            };
+        }
     }, []);
 
     const toggleListening = () => {
         if (isListening) {
-            stopListening();
+            recognition.current.stop();
         } else {
-            startListening();
+            recognition.current.start();
         }
     };
 
-    const getSpeechRecognition = () => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        return recognition;
-    };
 
-    const startListening = () => {
-        const recognition = getSpeechRecognition();
-        recognition.start();
 
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            recognition.stop();
-            setIsListening(false);
-            setUserMessage(transcript);
-            sendMessageToApi(transcript);
-        };
 
-        recognition.onerror = (event) => {
-            recognition.stop();
-            setIsListening(false);
-            console.error('Speech recognition error', event.error);
-        };
 
-        recognition.onend = () => setIsListening(false);
-    };
-
-    const stopListening = () => {
-        const recognition = getSpeechRecognition();
-        recognition.stop();
-        setIsListening(false);
-    };
-
-    const sendMessageToApi = (message) => {
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            ws.current.send(message);
+    const sendMessage = (message) => {
+        
+        if (typeof message !== 'string') {
+            console.error('Expected a string for message but received:', message);
+            return; // Exit if message is not a string to avoid further errors
+        }
+        
+        // if (!message || !message.trim()) {
+        //     console.log("No message to send");
+        //     return; // Exit the function if message is null or empty
+        // }
+    
+        if (socket && message.trim()) {
+            socket.emit('send_message', message);
+            setMessages(prevMessages => [...prevMessages, { text: message, sender: 'User' }]);
+            setUserMessage('');
         }
     };
+
 
     const speak = (text) => {
         const speechSynthesis = window.speechSynthesis;
-        const speech = new SpeechSynthesisUtterance(text);
-        speechSynthesis.speak(speech);
+        if (!speechSynthesis) {
+            console.log("Speech synthesis not supported in this browser.");
+            return;
+        }
+    
+        // Wait for voices to be loaded if not loaded
+        let voices = speechSynthesis.getVoices();
+        if (!voices.length) {
+            speechSynthesis.onvoiceschanged = () => {
+                voices = speechSynthesis.getVoices();
+                doSpeak(text, voices);
+            };
+        } else {
+            doSpeak(text, voices);
+        }
     };
+    
+    const doSpeak = (text, voices) => {
+        const speech = new SpeechSynthesisUtterance(text);
+        const voice = voices.find(v => v.name.includes("Google UK English Female")) || voices[1];
+        speech.voice = voice;
+        speech.pitch = 1.2;  // Slightly higher pitch to make the tone happier
+        speech.rate = 1;  // Normal speaking rate
+        window.speechSynthesis.speak(speech);
+    };
+    
 
     return (
         <div className="questy-container">
-        <div className="top-section">
-            <img src="/Questy.gif" alt="Questy, your Learning Assistant" className="questy-gif" />
-            <div className="thought-cloud" style={{ backgroundImage: `url(${thoughtCloud})` }}>
-                <p className="thought-message">{questyMessage}</p>
+            <div className="messages-container">
+                {messages.map((msg, index) => (
+                    <p key={index} className={`message ${msg.sender === 'User' ? 'user' : 'questy'}`}>
+                        {msg.text}
+                    </p>
+                ))}
+                <div ref={messagesEndRef} />
             </div>
-        </div>
-        <div className="status">Connection Status: {connectionStatus}</div>
-        <div className="user-message">You said: {userMessage}</div>
-        {speechRecognitionSupported ? (
-            <button className="toggle-listen" onClick={toggleListening}>
+            <input
+                type="text"
+                value={userMessage}
+                onChange={(e) => setUserMessage(e.target.value)}
+                placeholder="Type your message..."
+                onKeyPress={event => event.key === 'Enter' ? sendMessage(userMessage) : null}
+            />
+
+           <div id="button-container">
+
+            <button id="sendButton" onClick={()=> sendMessage(userMessage)}>Send</button>
+            <button  id="listenButton" onClick={toggleListening} style={{ backgroundColor: isListening ? 'red' : 'blue' }}>
                 {isListening ? 'Stop Listening' : 'Start Listening'}
             </button>
-        ) : (
-            <p>Your browser does not support speech recognition.</p>
-        )}
-    </div>
+            </div>
+        </div>
     );
 };
 
