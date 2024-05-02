@@ -87,8 +87,8 @@ body, html {
 
 .messages-container {
     overflow-y: auto; /* Enables scrolling */
-    flex-grow: 1; /* Takes up all available space */
-    padding: 10px;
+    flex-grow: 10; /* Takes up all available space */
+    padding: 5px;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -126,9 +126,12 @@ input[type="text"], button {
 }
 
 input[type="text"] {
+    padding: 20px;
+    margin-top: 20px;
     flex-grow: 1; /* Allows input to take remaining space */
     margin-right: 10px; /* Space between input and button */
     border-radius: 4px;
+    height: 1%;
     border: 1px solid #ccc;
 }
 
