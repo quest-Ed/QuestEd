@@ -5,7 +5,7 @@ body, html {
     background-color: white; /* Set background to white */
   }
   
-  .questy-container {
+  /* .questy-container {
     position: relative;
     width: 100vw;
     height: 100vh;
@@ -13,8 +13,11 @@ body, html {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: white; /* Assuming you want a white background */
-}
+    background-color: white;
+  }
+    
+ Assuming you want a white background */
+
 
 .top-section {
     display: flex;
@@ -66,4 +69,109 @@ body, html {
     font-size: 1rem;
     cursor: pointer;
     outline: none;
+}
+
+.questy-container {
+    width: 400px;
+    margin-left:auto;
+    margin-right: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    height: 400px; /* or any other fixed height */
+}
+
+.messages-container {
+    overflow-y: auto; /* Enables scrolling */
+    flex-grow: 10; /* Takes up all available space */
+    padding: 5px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 80%;
+    word-wrap: break-word; /* Ensure text breaks to avoid horizontal scrolling */
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+/* Styling messages from the user */
+.message.user {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end; /* Aligns user messages to the right */
+    text-align: right;
+}
+
+/* Styling messages from the Questy AI */
+.message.questy {
+    background-color: #e2e2e2;
+    color: black;
+    align-self: flex-start; /* Aligns Questy's messages to the left */
+    text-align: left;
+}
+
+input[type="text"], button {
+    padding: 10px;
+    margin-top: 10px; /* Space between messages and input */
+}
+
+input[type="text"] {
+    padding: 20px;
+    margin-top: 20px;
+    flex-grow: 1; /* Allows input to take remaining space */
+    margin-right: 10px; /* Space between input and button */
+    border-radius: 4px;
+    height: 1%;
+    border: 1px solid #ccc;
+}
+
+
+button:hover {
+    opacity: 0.8;
+}
+
+
+button {
+    
+
+    width: 100px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #007bff;
+}
+
+button.listening {
+    background-color: #007bff; /* Listening state */
+}
+
+button.not-listening {
+    background-color: rgb(9, 255, 0); /* Not listening state */
+}
+
+#button-container {
+    display: flex;         /* Enables flexbox layout mode */
+    justify-content: space-around; /* Distributes space around items */
+    align-items: center;   /* Vertically centers the items in the container */
+}
+
+#sendButton, #listenButton {
+    flex: 1;               /* Each button will take equal space */
+    margin: 5px;           /* Adds a little space around the buttons */
 }
