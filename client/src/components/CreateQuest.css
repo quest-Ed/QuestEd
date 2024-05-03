@@ -1,0 +1,85 @@
+.createQuestContainer {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;  /* Ensure this matches your design color */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+}
+
+.questHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.questyImag {
+    width: 150px; /* Adjust according to your design */
+    z-index:1;
+    margin-top: -40px;
+    margin-left:30px;
+    margin-bottom:-20px;
+}
+
+.thoughtCloudContainer {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    z-index:2;
+    margin-right:150px;
+}
+
+.thoughtCloudImage {
+    width: 200px;
+
+}
+
+.thoughtCloudText {
+    position: absolute;
+    top: 20%;
+    left: 15%;
+    width: 70%;
+    color: #333;
+    font-size: 18px; /* Adjust font size as needed */
+    text-align: center;
+}
+
+.description {
+    font-size: 24px; /* Adjust font size as needed */
+    color: #666;
+    margin: 20px 0;
+    line-height: 1.4;
+}
+
+.inputField, .fileUpload, .createButton {
+    width: 250px;  /* Adjust width as needed */
+    padding: 10px;
+    margin: 10px auto;
+    font-size: 16px; /* Adjust font size as needed */
+    border-radius: 5px;  /* Rounded corners for inputs and button */
+}
+.inputField {
+    width: 400px;
+    margin-top:20px;
+    margin-left: 475px;
+
+}
+
+.createButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.createButton:hover {
+    background-color: #45a049;
+}
+
+.link {
+    color: #0000FF;
+    text-decoration: none;
+}

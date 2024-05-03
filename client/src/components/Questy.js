@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import './Questy.css';
 
-const Questy = () => {
+const Questy = ({topic}) => {
     const [userMessage, setUserMessage] = useState('');
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([{ text: `Let's have a quest on ${topic}! Are you ready?`, sender: 'Questy' }]);
     const [isListening, setIsListening] = useState(false);
     const [socket, setSocket] = useState(null);
     const recognition = useRef(null);
@@ -72,20 +72,16 @@ const Questy = () => {
 
 
 
-    const sendMessage = (message) => {
+    const sendMessage = (message, topic) => {
         
         if (typeof message !== 'string') {
             console.error('Expected a string for message but received:', message);
-            return; // Exit if message is not a string to avoid further errors
+            return; 
         }
         
-        // if (!message || !message.trim()) {
-        //     console.log("No message to send");
-        //     return; // Exit the function if message is null or empty
-        // }
-    
         if (socket && message.trim()) {
-            socket.emit('send_message', message);
+            socket.emit('send_message', {message, topic});
+            console.log(`sending message ${message} and topic ${topic}`)
             setMessages(prevMessages => [...prevMessages, { text: message, sender: 'User' }]);
             setUserMessage('');
         }
@@ -112,14 +108,25 @@ const Questy = () => {
     };
     
     const doSpeak = (text, voices) => {
-        const speech = new SpeechSynthesisUtterance(text);
-        const voice = voices.find(v => v.name.includes("Google UK English Female")) || voices[1];
-        speech.voice = voice;
-        speech.pitch = 1.2;  // Slightly higher pitch to make the tone happier
-        speech.rate = 1;  // Normal speaking rate
-        window.speechSynthesis.speak(speech);
-    };
+        // Split the text into chunks
+        const chunkLength = 200; // You can adjust the chunk length
+        const regex = new RegExp(`.{1,${chunkLength}}(\\s|$)|\\S+?(\\s|$)`, 'g');
+        const chunks = text.match(regex);
     
+        // Voice settings
+        const voice = voices.find(v => v.name.includes("Google UK English Female")) || voices[1];
+        
+        chunks.forEach(chunk => {
+            const speech = new SpeechSynthesisUtterance(chunk);
+            speech.voice = voice;
+            speech.pitch = 1.2;
+            speech.rate = 1.2;
+            speech.onend = () => {
+                console.log("Finished speaking a chunk.");
+            };
+            window.speechSynthesis.speak(speech);
+        });
+    };
 
     return (
         <div className="questy-container">
@@ -136,12 +143,12 @@ const Questy = () => {
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 placeholder="Type your message..."
-                onKeyPress={event => event.key === 'Enter' ? sendMessage(userMessage) : null}
+                onKeyPress={event => event.key === 'Enter' ? sendMessage(userMessage,topic) : null}
             />
 
            <div id="button-container">
 
-            <button id="sendButton" onClick={()=> sendMessage(userMessage)}>Send</button>
+            <button id="sendButton" onClick={()=> sendMessage(userMessage,topic)}>Send</button>
             <button  id="listenButton" onClick={toggleListening} style={{ backgroundColor: isListening ? 'red' : 'blue' }}>
                 {isListening ? 'Stop Listening' : 'Start Listening'}
             </button>

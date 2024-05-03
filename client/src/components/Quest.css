@@ -1,0 +1,24 @@
+.QuestContainer {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;  /* Ensure this matches your design color */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    padding-top: 0px;
+    margin-top: -110px;
+ 
+}
+h1 {
+text-align: center;
+}
+
+.questyImage {
+    width: 350px; /* Adjust according to your design */
+    z-index:1;
+    margin-top: -350px;
+    margin-left:auto;
+   
+}
