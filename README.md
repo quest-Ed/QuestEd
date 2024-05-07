@@ -14,10 +14,13 @@ QuestEd is currently built on MERN (MongoDb, Express, React, NodeJs) stack, and 
 
 QuestEd follows a monolith type code architecture with React Front end, and an Express Backend, along with MongoDB database. The React Front end code is in the 'client' folder of the  root directory, while the backend code is in the 'server' folder in root directory.
 
+# Demo
+
+You can check our demo video [here](https://youtu.be/679DOnJxGc0) !
+
+Let us know your thoughts and feedback at ankbhand2@gmail.com
 
 # Installation and Setup
-
-A demo version of QuestEd is currently hosted here: 
 
 ## Developers:
 After downloading the repo in your local machine,
@@ -67,6 +70,8 @@ in development
 
 # Future Work:
 
+Incorporate other LLMs.
+Improve the User experience by adding more structured prompts.
 
 
 
