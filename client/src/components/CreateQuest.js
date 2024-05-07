@@ -28,8 +28,7 @@ function CreateQuest() {
         <div className="createQuestContainer">
             <h1>QuestEd</h1>
             <p className="description">
-                Create a Quest and engage your learners with Questy!<br />
-                A quest is a story-based learning experience to engage learners.
+                Create a <strong>Quest</strong>, a story-based learning experience, to engage your learners and assess their needs with Questy!<br /> 
             </p>
             <div className="questHeader">
                 

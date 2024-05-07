@@ -119,8 +119,8 @@ const Questy = ({topic}) => {
         chunks.forEach(chunk => {
             const speech = new SpeechSynthesisUtterance(chunk);
             speech.voice = voice;
-            speech.pitch = 1.2;
-            speech.rate = 1.2;
+            speech.pitch = 1;
+            speech.rate = 1.1;
             speech.onend = () => {
                 console.log("Finished speaking a chunk.");
             };

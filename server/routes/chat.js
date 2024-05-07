@@ -2,24 +2,43 @@ require('dotenv').config();
 const { GoogleGenerativeAI, HarmCategory,
     HarmBlockThreshold, } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const MODEL_NAME = "gemini-1.5-pro-latest";
+const MODEL_NAME = "gemini-1.0-pro";
 
 const { Router } = require('express');
-const axios = require('axios');
 console.log('Using API Key:', process.env.GOOGLE_API_KEY);
 module.exports = (io) => {
     const router = Router();
+    const sessions = {}; 
 
     io.on('connection', (socket) => {
         console.log('A user connected');
+        sessions[socket.id] = { history: [] };
 
         socket.on('send_message', async ({ message, topic }) => {
             console.log(`Received message: ${message} on topic: ${topic}`);
-            await sendMessageToGemini(socket, message,topic);
+            
+            if (sessions[socket.id].history.length === 0) {
+
+              sessions[socket.id].history.push({
+                role: "user",
+                parts: [{ text: `You are telling a story about a character who is trying to study ${topic}. 
+                You talk about multiple observations this fictional character finds. After each observation,
+                you ask the user if they can help this character to figure out what it means, and wait for the answer.
+                 Do not continue with the story unless the user has answered a question.
+                  Tell them the correct answer if they get it wrong. Be polite.
+                  Your every response should end with a question. 
+                  Your response should not be more than 3 sentences long. 
+                 `}]});
+
+                 sessions[socket.id].history.push({ role: "model", parts: [{ text: `Alright, Let dive into a quest on ${topic}! Are you ready?` }] });
+          }
+
+            await sendMessageToGemini(socket, message, sessions[socket.id].history);
         });
 
         socket.on('disconnect', () => {
             console.log('User disconnected');
+            delete sessions[socket.id];  
         });
 
         socket.on('error', (error) => {
@@ -27,17 +46,16 @@ module.exports = (io) => {
         });
     });
 
-    async function sendMessageToGemini(socket, message, topic) {
+    async function sendMessageToGemini(socket, message, history) {
         try {
             // Initialize the generative model
             const model = genAI.getGenerativeModel({ 
-              model: MODEL_NAME,
-              // system_instruction: {text: `You are a Learning Assistant. Your name is Questy. 
-              // You create engaging stories called Quest with fictional characters to help user
-              // learn a concept they want to understand. The current topic is ${topic}
-              // } ` 
+            model: MODEL_NAME});
           
-            });
+          //      systemInstruction: `You are a Learning Assistant. Your name is Questy. 
+          //      You create engaging stories called Quest with fictional characters to help user
+          //      learn a concept they want to understand. The current topic is ${topic}` 
+          // });
               
               // For the commented out part, there is a bug in the Gemini API; due to which this functionality doesn't work. The model still acts as Gemini and not Questy. This won't affect the core functionality below. 
               // hoping the future fixes will improve the model outputs.
@@ -59,17 +77,21 @@ module.exports = (io) => {
                   threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
                 },
               ];
+            //   if (history.length === 0 || history[history.length - 1].role === "model") {
+            //     history.push({ role: "user", parts: [{ text: message }] });
+            // } else {
+            //     // Ensuring we don't add a user message after another user message
+            //     console.error("Attempting to add a user message after another user message.");
+            //     return;
+            // }
 
-               const parts = [
-                 {text: `You are a Learning Assistant. Your name is Questy. 
-                  You create engaging stories called Quest with fictional characters to help user
-                  learn a concept they want to understand. The current topic is ${topic}`}
-               ];
 
 
-            const chat = model.startChat({ contents: [{ role: "user", parts }],
-                generationConfig: {
-                  maxOutputTokens: 500,
+
+
+            const chat = model.startChat(
+               { generationConfig: {
+                  maxOutputTokens: 300,
                   temperature: 1,
                   topK: 1,
                   topP: 0.65,
@@ -77,47 +99,23 @@ module.exports = (io) => {
                 }
                 , safetySettings,
 
-                history: [
-                  {
-                  role: "user",
-                    parts: [{ text: ` Create an interactive story on ${topic}. Stop talking after 2-3 sentences and ask the user a question related to the story you discussed. 
-                    `}]
-                  }
-                    ,
-                  {
-                    role: "model",
-                    parts: [{ text: "Once upon a time, there was a curious geologist named Rocky.  One day, he went on an adventure to explore the Earth's layers.  He started at the Earth's crust, which is the outermost layer.  Rocky found many interesting rocks and minerals there. Can you guess what is the layer beneath the Earth's crust?"}],
-                  },
-                  {
-                    role: "user",
-                    parts: [{ text: "hmm, i don't know"}],
-                  },
-                  {
-                    role: "model",
-                    parts: [{ text: "Hey, just so you know, we can't move forward, if you don't answer the question!"}],
-                  },
-                  {
-                    role: "user",
-                    parts: [{ text: "crust"}],
-                  },
-                  {
-                    role: "model",
-                    parts: [{ text: "Oh No, you are incorrect ! The layer beneath the Earth's crust is called the mantle. After exploring the crust, Rocky dug deeper and reached the mantle. The mantle is the thickest layer of the Earth.  It is made up of hot, molten rock called magma. What do you think happens to the magma when it cools down?"}],
-                  },
-                  {
-                    role: "user",
-                    parts: [{ text: "it becomes a rock"}],
-                  },
-                  {
-                    role: "model",
-                    parts: [{ text: "Yes, you are correct! Good job!"}],
-                  },]
-    
-              });
+                history} );
             
             const result = await chat.sendMessage(message);
             const response = await result.response;
             const text = response.text();
+
+           // history.push({ role: "model", parts: [{ text }] });
+
+            // Check if response naturally leads to user input, if not, add a prompt
+          //   if (!text.trim().endsWith('?')) {
+          //     history.push({
+          //         role: "model",
+          //         parts: [{ text: "What do you think about that?" }]
+          //     });
+          // }
+
+
     
             console.log('Received response:', text);
             socket.emit('receive_message', text);  // Send the response back to the client
