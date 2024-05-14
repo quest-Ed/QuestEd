@@ -2,7 +2,6 @@
     text-align: center;
     font-family: Arial, sans-serif;
     background-color: #f0f8ff;  /* Ensure this matches your design color */
-    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -11,6 +10,12 @@
 
 .questHeader {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.questParameters {
+    display:flex;
     flex-direction: column;
     align-items: center;
 }
@@ -54,7 +59,7 @@
     line-height: 1.4;
 }
 
-.inputField, .fileUpload, .createButton {
+ .fileUpload, .createButton {
     width: 250px;  /* Adjust width as needed */
     padding: 10px;
     margin: 10px auto;
@@ -63,8 +68,7 @@
 }
 .inputField {
     width: 400px;
-    margin-top:20px;
-    margin-left: 475px;
+    margin-top:10px;
 
 }
 

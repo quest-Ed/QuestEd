@@ -2,7 +2,7 @@ require('dotenv').config();
 const { GoogleGenerativeAI, HarmCategory,
     HarmBlockThreshold, } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const MODEL_NAME = "gemini-1.0-pro";
+const MODEL_NAME = "gemini-1.5-pro-latest";
 
 const { Router } = require('express');
 console.log('Using API Key:', process.env.GOOGLE_API_KEY);

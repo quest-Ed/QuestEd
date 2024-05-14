@@ -40,6 +40,7 @@ function CreateQuest() {
                 </div>
                 <img src={QuestyGif} alt="Questy" className="questyImag" />
             </div>
+            <div className="questParameters">
             <input className="inputField" type="text" value={topic} onChange={handleTopicChange} placeholder="Specify a topic to tailor the quest (e.g., Biology, History)" />
             <label>
             Upload a document (Optional) 
@@ -48,6 +49,7 @@ function CreateQuest() {
              
             <button className="createButton" onClick={handleCreateQuest}>Create a Quest</button>
             Quest created at: {questLink && <a className="link" href={questLink} target="_blank"> {questLink}</a>}
+            </div>
         </div>
     );
 }
