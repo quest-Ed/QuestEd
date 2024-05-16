@@ -3,6 +3,9 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const chatRouter = require('./routes/chat');  // Assuming your chat logic is separated here
+const uploadRoutes = require('./routes/uploadRoutes');
+
+
 require('dotenv').config();
 
 const app = express();
@@ -29,6 +32,10 @@ const io = socketIo(server, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/chat', chatRouter(io)); // Pass the io instance to the router
+
+
+app.use('/api', uploadRoutes);
+
 
 // Catch-all route for testing that the server is running
 app.get('/', (req, res) => {

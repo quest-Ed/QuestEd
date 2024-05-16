@@ -1,30 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
-import io from 'socket.io-client';
 import './Questy.css';
+import { useUpload } from './UploadContext';
 
 const Questy = ({topic}) => {
     const [userMessage, setUserMessage] = useState('');
     const [messages, setMessages] = useState([{ text: `Let's have a quest on ${topic}! Are you ready?`, sender: 'Questy' }]);
     const [isListening, setIsListening] = useState(false);
-    const [socket, setSocket] = useState(null);
+   // const [socket, setSocket] = useState(null);
+   const { socket, documentText } = useUpload();
+
     const recognition = useRef(null);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        const newSocket = io(`http://${window.location.hostname}:3000`);
-        setSocket(newSocket);
 
-        newSocket.on('receive_message', (message) => {
+        if (socket) {
+        socket.on('receive_message', (message) => {
             setMessages(prevMessages => [...prevMessages, { text: message, sender: 'Questy' }]);
             speak(message);
         });
 
-        newSocket.on('error_message', (error) => {
+        socket.on('error_message', (error) => {
             console.error('WebSocket error:', error);
         });
 
-        return () => newSocket.close();
-    }, []);
+        if (documentText) {
+            sendMessage(documentText, topic, true);  // Sending document text as a special command or flag
+        }
+
+        return () => {
+            socket.off('receive_message');
+            socket.off('error_message');
+        };
+    }
+
+
+    
+    }, [socket, documentText]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,16 +84,21 @@ const Questy = ({topic}) => {
 
 
 
-    const sendMessage = (message, topic) => {
+    const sendMessage = (message, topic, isDocument = false) => {
         
         if (typeof message !== 'string') {
             console.error('Expected a string for message but received:', message);
             return; 
         }
+
+        const data = { message, topic };
+    if (isDocument && documentText) {
+        data.documentText = documentText;  // Including document text if it's from the document
+    }
         
         if (socket && message.trim()) {
-            socket.emit('send_message', {message, topic});
-            console.log(`sending message ${message} and topic ${topic}`)
+            socket.emit('send_message', data);
+            console.log(`Sending message: ${message}, Topic: ${topic}, Document used: ${isDocument}`)
             setMessages(prevMessages => [...prevMessages, { text: message, sender: 'User' }]);
             setUserMessage('');
         }

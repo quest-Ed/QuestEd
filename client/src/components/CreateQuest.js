@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import QuestyGif from '../assets/questy.gif';
 import ThoughtCloud from '../assets/ThoughtCloud.png';
+import { useUpload } from './UploadContext';
+
 
 import './CreateQuest.css';
 
 
 function CreateQuest() {
     const [topic, setTopic] = useState('');
-    const [document, setDocument] = useState(null);
+    //const [document, setDocument] = useState(null);
     const [questLink, setQuestLink] = useState('');
+    const { handleDocumentUpload } = useUpload();
 
     const handleTopicChange = (event) => {
         setTopic(event.target.value);
     };
 
-    const handleDocumentUpload = (event) => {
-        setDocument(event.target.files[0]);
-    };
+    // const handleDocumentUpload = (event) => {
+    //     setDocument(event.target.files[0]);
+    //     handleFileUpload(event.target.files[0]);
+    // };
 
     const handleCreateQuest = () => {
         // Include the topic in the URL for the Quest component
@@ -44,7 +48,7 @@ function CreateQuest() {
             <input className="inputField" type="text" value={topic} onChange={handleTopicChange} placeholder="Specify a topic to tailor the quest (e.g., Biology, History)" />
             <label>
             Upload a document (Optional) 
-            <input className="fileUpload" type="file" onChange={handleDocumentUpload} /> 
+            <input className="fileUpload" type="file" onChange={(e) => handleDocumentUpload(e.target.files[0])}  /> 
             </label>
              
             <button className="createButton" onClick={handleCreateQuest}>Create a Quest</button>

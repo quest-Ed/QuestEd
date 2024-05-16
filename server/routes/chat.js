@@ -1,10 +1,12 @@
 require('dotenv').config();
-const { GoogleGenerativeAI, HarmCategory,
-    HarmBlockThreshold, } = require("@google/generative-ai");
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 const MODEL_NAME = "gemini-1.5-pro-latest";
 
 const { Router } = require('express');
+
 console.log('Using API Key:', process.env.GOOGLE_API_KEY);
 module.exports = (io) => {
     const router = Router();
@@ -14,21 +16,37 @@ module.exports = (io) => {
         console.log('A user connected');
         sessions[socket.id] = { history: [] };
 
-        socket.on('send_message', async ({ message, topic }) => {
+        socket.on('send_message', async ({ message, topic , documentText}) => {
             console.log(`Received message: ${message} on topic: ${topic}`);
+            console.log('Document text:', documentText); 
             
             if (sessions[socket.id].history.length === 0) {
 
-              sessions[socket.id].history.push({
-                role: "user",
-                parts: [{ text: `You are telling a story about a character who is trying to study ${topic}. 
+              let userText = `You are telling a story about a character who is trying to study ${topic}.`;
+
+              if (documentText && documentText.trim() !== "") {
+                userText += ` Use specific information in the document ${documentText} as a reference for your story. 
                 You talk about multiple observations this fictional character finds. After each observation,
                 you ask the user if they can help this character to figure out what it means, and wait for the answer.
                  Do not continue with the story unless the user has answered a question.
                   Tell them the correct answer if they get it wrong. Be polite.
                   Your every response should end with a question. 
-                  Your response should not be more than 3 sentences long. 
-                 `}]});
+                  Your response should not be more than 3 sentences long.`;
+            } else {
+                // Fallback narrative if no document text is provided
+                userText += ` You talk about multiple observations this fictional character finds. After each observation,
+                you ask the user if they can help this character to figure out what it means, and wait for the answer.
+                 Do not continue with the story unless the user has answered a question.
+                  Tell them the correct answer if they get it wrong. Be polite.
+                  Your every response should end with a question. 
+                  Your response should not be more than 3 sentences long. `
+            }
+    
+
+              sessions[socket.id].history.push({
+                role: "user",
+                parts: [{ text: userText }]
+            });
 
                  sessions[socket.id].history.push({ role: "model", parts: [{ text: `Alright, Let dive into a quest on ${topic}! Are you ready?` }] });
           }
@@ -61,20 +79,16 @@ module.exports = (io) => {
               // hoping the future fixes will improve the model outputs.
             const safetySettings = [
                 {
-                  category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-                  threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                  category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
                 },
                 {
-                  category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                  threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                  category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
                 },
                 {
-                  category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                  threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                  category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
                 },
                 {
-                  category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                  threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                  category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
                 },
               ];
             //   if (history.length === 0 || history[history.length - 1].role === "model") {
