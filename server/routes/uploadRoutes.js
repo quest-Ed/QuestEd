@@ -1,4 +1,6 @@
 const { Router } = require('express');
+const fs = require('fs');
+const pdf = require('pdf-parse');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
@@ -23,7 +25,7 @@ router.post('/upload', upload.single('document'), async (req, res) => {
     }
     console.log('Uploaded file:', req.file.path);
     const extractedText = await extractTextFromPDF(req.file.path);
-    console.log('Extracted text:', extractedText);
+   // console.log('Extracted text:', extractedText);
 
     // You can add further processing here or return the extracted text to the client
     res.send({ message: 'File uploaded and text extracted.', extractedText });

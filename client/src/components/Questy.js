@@ -13,30 +13,31 @@ const Questy = ({topic}) => {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-
         if (socket) {
-        socket.on('receive_message', (message) => {
-            setMessages(prevMessages => [...prevMessages, { text: message, sender: 'Questy' }]);
-            speak(message);
-        });
+            socket.on('receive_message', (message) => {
+                setMessages(prevMessages => [...prevMessages, { text: message, sender: 'Questy' }]);
+                speak(message);
+            });
 
-        socket.on('error_message', (error) => {
-            console.error('WebSocket error:', error);
-        });
+            socket.on('error_message', (error) => {
+                console.error('WebSocket error:', error);
+            });
 
+            return () => {
+                socket.off('receive_message');
+                socket.off('error_message');
+            };
+        }
+    }, [socket]);
+
+    useEffect(() => {
         if (documentText) {
+            console.log('Document text available in Questy:', documentText);  // Add this log
             sendMessage(documentText, topic, true);  // Sending document text as a special command or flag
         }
-
-        return () => {
-            socket.off('receive_message');
-            socket.off('error_message');
-        };
-    }
+    }, [documentText, socket]);
 
 
-    
-    }, [socket, documentText]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

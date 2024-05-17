@@ -9,7 +9,7 @@ export function useUpload() {
 
 export const UploadProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
-    const [documentText, setDocumentText] = useState("");
+    const [documentText, setdocumentText] = useState("");
 
     useEffect(() => {
         const newSocket = io(`http://${window.location.hostname}:3000`);
@@ -25,13 +25,14 @@ export const UploadProvider = ({ children }) => {
         formData.append('document', file);
 
         try {
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch('http://localhost:3000/api/upload', {
                 method: 'POST',
                 body: formData,
             });
             const data = await response.json();
             if (data.extractedText) {
-                setDocumentText(data.extractedText);
+                setdocumentText(data.extractedText);
+                console.log('documentText is now set')
             }
         } catch (error) {
             console.error('Error uploading file:', error);

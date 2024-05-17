@@ -1,6 +1,4 @@
 require('dotenv').config();
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 const MODEL_NAME = "gemini-1.5-pro-latest";
